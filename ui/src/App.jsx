@@ -10,20 +10,28 @@ function App()
   const [authenticated,setAuthenticated] = useState(false);
   const [cookieChecked,setCookieChecked]=useState(false);
   const checkCookies=async ()=>{
-    const response=await fetch("http://localhost:8080/check-cookie",{
-      method:"GET",
-      credentials:"include",
-    });
-    const result=await response.json();
-    if(result.validity)
+    try
     {
-      setAuthenticated(true);
+      const response=await fetch("http://localhost:8080/check-cookie",{
+        method:"GET",
+        credentials:"include",
+      });
+      const result=await response.json();
+      if(result.validity)
+      {
+        setAuthenticated(true);
+      }
+      else
+      {
+        document.cookie="token=;max-age=0;path=/";
+      }
+      setCookieChecked(true);
     }
-    else
+    catch(e)
     {
-      document.cookie="token=;max-age=0;path=/";
+      console.log(e);
+      setCookieChecked(true);
     }
-    setCookieChecked(true);
   }
   useEffect(()=>{
     checkCookies();
