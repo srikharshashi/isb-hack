@@ -48,6 +48,7 @@ async def disconnect(sid):
         print('Client disconnected:',sid)
 
 @sio.event
+
 async def message(sid,message):
     try:
         message_ref=""

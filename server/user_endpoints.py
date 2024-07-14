@@ -147,7 +147,12 @@ async def get_previous_chat(request:Request,doc:dict=Depends(check_cookies)):
 
 @app.get("/",dependencies=[Depends(check_cookies)])
 def main_endpoint(request:Request):
-    print("Hitting the main endpoints")
-    return "This will send the react page"
+    try:
+        with open("./dist/index.html","r") as page:
+            content=page.read()
+        return HTMLResponse(content=content,status_code=200)
+    except Exception as e:
+        print("Something went wrong trying to read the file")
+        return "Error"
 
 

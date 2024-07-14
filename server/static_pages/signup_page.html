@@ -34,7 +34,7 @@
                 const password=document.getElementById("passwordInput").value;
                 const hashedPassword=CryptoJS.SHA256(password).toString();
                 const userData={email,username,password:hashedPassword};
-                const response=await fetch("http://localhost:8080/signup-user",{
+                const response=await fetch("signup-user",{
                   method:"POST",
                   headers: {
                             'Content-Type': 'application/json',
@@ -43,7 +43,7 @@
                 });
                 if(response.ok)
                 {
-                  window.location.href="http://localhost:8080/login";
+                  window.location.href="login";
                 }
                 else
                 {
