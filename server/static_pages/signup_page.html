@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" class="w-screen h-screen bg-slate-800 text-slate-100">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChatPlat | Signup</title>
+    <link rel="stylesheet" href="page/login_style_proc.css">
+  </head>
+  <body class="w-full h-full flex justify-center items-center">
+    <div id="pane" class="w-4/5 h-4/5 font-semibold border-2 border-white flex flex-col sm:flex-row justify-around items-center">
+        <h6 class="basis-1/6 w-full sm:basis-2/6 flex justify-center items-center text-4xl">ChatPlat</h6>
+        <div class="basis-5/6 w-full sm:basis-4/6 h-5/6 flex flex-col justify-evenly items-center">
+            <div class="w-11/12 basis-1/6 text-xl flex flex-col justify-center items-begin">
+                <p>E-mail:</p>
+                <input id="emailInput" type="text" class="text-black border-2 border-black"></input>
+            </div>
+            <div class="w-11/12 basis-1/6 text-xl flex flex-col justify-center items-begin">
+                <p>Username:</p>
+                <input id="usernameInput" type="text" class="text-black border-2 border-black"></input>
+            </div>
+            <div class="w-11/12 basis-1/6 text-xl flex flex-col justify-center items-begin">
+                <p>Password</p>
+                <input id="passwordInput" type="password" class="text-black border-2 border-black"></input>
+            </div>
+            <button id="submit-button" type="submit" class="w-11/12 basis-1/6 border-2 border-white hover:bg-black">Sign Up</button>
+            <a href="/login" class="basis-1/12 text-white hover:text-blue-500 text-sm flex justify-center items-center">Return back to login screen</a>
+            <script src="page/cryptohs_min.js"></script>
+            <script>
+              const button=document.getElementById("submit-button");
+              button.addEventListener("click",async (e)=>{
+                e.preventDefault();
+                const email=document.getElementById("emailInput").value;
+                const username=document.getElementById("usernameInput").value;
+                const password=document.getElementById("passwordInput").value;
+                const hashedPassword=CryptoJS.SHA256(password).toString();
+                const userData={email,username,password:hashedPassword};
+                const response=await fetch("http://localhost:8080/signup-user",{
+                  method:"POST",
+                  headers: {
+                            'Content-Type': 'application/json',
+                        },
+                  body: JSON.stringify(userData),
+                });
+                if(response.ok)
+                {
+                  window.location.href="http://localhost:8080/login";
+                }
+                else
+                {
+                    console.log("Something went wrong on the server side");
+                }
+              });
+            </script>
+        </div>
+    </div>
+  </body>
+</html>

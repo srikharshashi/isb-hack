@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" class="w-screen h-screen bg-slate-800 text-slate-100">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatPlat | Login</title>
+    <link rel="stylesheet" href="page/login_style_proc.css">
+  </head>
+  <body class="w-full h-full flex justify-center items-center">
+    <div id="pane" class="w-4/5 h-4/5 font-semibold border-2 border-white flex flex-col sm:flex-row justify-around items-center">
+        <h6 class="basis-1/6 w-full sm:basis-2/6 h-4/5 text-4xl flex justify-center items-center">ChatPlat</h6>
+        <div class="basis-5/6 w-full sm:basis-4/6 h-4/5 flex flex-col justify-evenly items-center">
+          <div class="w-11/12 basis-2/6 text-xl flex flex-col justify-center items-begin">
+            <p>E-mail:</p>
+            <input id="idInput" type="text" class="text-black border-2 border-black"></input>
+        </div>
+        <div class="w-11/12 basis-2/6 text-xl flex flex-col justify-center items-begin">
+            <p>Password</p>
+            <input id="passwordInput" type="password" class="text-black border-2 border-black"></input>
+        </div>
+        <button type="submit" id="submit-button" class="w-11/12 basis-1/6 border-2 border-white hover:bg-black">Sign In</button>
+        <a href="/signup" class="basis-1/6 text-white hover:text-blue-500 text-sm flex justify-center items-center">Dont have an account? Sign Up</a>
+        </div>
+    </div>
+    <script src="page/cryptohs_min.js"></script>
+    <script>
+      const button=document.getElementById("submit-button");
+      button.addEventListener("click",async (e)=>{
+        e.preventDefault();
+        const identifier=document.getElementById("idInput").value;
+        const password=document.getElementById("passwordInput").value;
+        const hashedPassword=CryptoJS.SHA256(password).toString();
+        const userData={identifier,password:hashedPassword};
+        const response=await fetch("http://localhost:8080/login-user",{
+          method:"POST",
+          headers: {
+                    'Content-Type': 'application/json',
+                },
+          body: JSON.stringify(userData),
+        });
+        if(response.ok)
+        {
+            const result=await response.json();
+            document.cookie=`token=${result.token};max-age=${30*60*60};path=/`
+            window.location.href="http://localhost:8080/";
+        }
+        else
+        {
+            console.log("Something went wrong on the server side");
+        }
+      });
+    </script>
+  </body>
+</html>

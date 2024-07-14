@@ -1,27 +1,7 @@
-from fastapi import HTTPException,Request,Depends
-from all_endpoints import app,db,User,LoginUser,key
+from fastapi import HTTPException,Request
+from fastapi.responses import HTMLResponse,Response,JSONResponse
+from all_endpoints import app,db,SignupUser,LoginUser,key
 import jwt
-import bcrypt
-
-
-@app.get("/check-cookie")
-async def check_cookie(request:Request):
-    try:
-        token=request.cookies.get("token")
-        if not token:
-            raise HTTPException(status_code=401,detail="Not a valid user according to cookies")
-        decoded_token=jwt.decode(token,key,algorithms=["HS256"])
-        id=decoded_token["id"]
-        doc=db.collection("users").document(id)
-        data=doc.get()
-        if data.exists:
-            return {"validity":True}
-        else:
-            return {"validity":False}
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500,detail="Something went wrong while checking cookies")
-
 
 @app.post("/login-user")
 async def login_user(user:LoginUser):
@@ -29,19 +9,17 @@ async def login_user(user:LoginUser):
         docs=None
         token=""
         validated=False
-        if "@" in user.identifier:
-            docs=db.collection("users").where("email","==",user.identifier)
-        else:
-            docs=db.collection("users").where("username","==", user.identifier)
-        result=docs.stream()
-        for doc in result:
-            data=doc.to_dict()
-            if(data["password"]==user.password):
-                token=jwt.encode({"id":doc.id},key,algorithm="HS256")
-                validated = True
-                break
+        if "@" not in user.identifier:
+            raise HTTPException(status_code=422, detail="Proper email needs to be entered")
+        doc=db.collection("users").where("email","==",user.identifier).get()
+        if not doc:
+            raise HTTPException(status_code=404, detail="User could not be found")
+        data=doc[0].to_dict()
+        if(data["password"]==user.password):
+            token=jwt.encode({"id":doc[0].id},key,algorithm="HS256")
+            validated = True
         if validated:
-            return {"token":token}
+            return JSONResponse(content={"token":token},status_code=200)
         else:
             raise HTTPException(status_code=404,detail="Valid user could not be found")
     except Exception as e:
@@ -49,21 +27,54 @@ async def login_user(user:LoginUser):
         raise HTTPException(status_code=500,detail="Login could not be completed")
 
 
-@app.post("/create-user")
-async def create_user(user:User):
+@app.post("/signup-user")
+async def signup_user(user:SignupUser):
     try:
         if "@" in user.username:
-            raise Exception("Username has @ character")
+            raise Exception(status_code=422,detail="Username has @ character")
+        if "@" not in user.email:
+            raise Exception(status_code=422, detail="Email is not valid")
         doc=db.collection('users').document()
         doc.set(user.dict())
-        return "User was successfully created"
+        return Response(content="User was successfully created",status_code=200)
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="User could not be created")
 
-@app.get("/test")
-async def test_endpoint():
-    print("Hitting the test endpoint")
-    return "This is just a test"
+
+#endpoints for pages from here
+static_page_path="./static_pages/"
+page_error_page="<html><head><title>ChatPlat | Error</title><body><p>Something went wrong trying to open the file</p></body></head></html>"
 
 
+@app.get("/login")
+async def login_page():
+    try:
+        with open(static_page_path+"login_page.html","r") as page:
+            content=page.read()
+        return HTMLResponse(content=content,status_code=200)
+    except Exception as e:
+        print("Something went wrong trying to read the file")
+        try:
+            with open(static_page_path + "error_page.html", "r") as page:
+                content = page.read()
+            return HTMLResponse(content=content, status_code=500)
+        except Exception as e:
+            print("Couldn't get the error page. Returning the default error response")
+            return HTMLResponse(content=page_error_page, status_code=500)
+
+@app.get("/signup")
+async def signup_page():
+    try:
+        with open(static_page_path+"signup_page.html","r") as page:
+            content=page.read()
+        return HTMLResponse(content=content,status_code=200)
+    except Exception as e:
+        print("Something went wrong trying to read the file")
+        try:
+            with open(static_page_path + "error_page.html", "r") as page:
+                content = page.read()
+            return HTMLResponse(content=content, status_code=500)
+        except Exception as e:
+            print("Couldn't get the error page. Returning the default error response")
+            return HTMLResponse(content=page_error_page, status_code=500)

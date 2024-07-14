@@ -53,7 +53,7 @@ function LoginForm({setSigningUp,setAuthenticated})
                 <p>Password</p>
                 <input type="password" value={password} onChange={(e)=>handleInput(e.target.value,setPassword)} className="border-2 border-white"></input>
             </div>
-            <button type="submit" onClick={(e)=>handleLogin(e)} className="border-2 border-white">Sign In</button>
+            <button type="submit" onClick={(e)=>handleLogin(e)} className="border-2 border-white basis-2/12">Sign In</button>
             <a className="text-white text-sm" onClick={handleScreenChange}>Dont have an account? Sign Up</a>
         </div>
     );
