@@ -1,3 +1,4 @@
+import { useState } from "react";
 import AddFriendScreen from "./AddFriendScreen.jsx";
 import CheckFriendRequestScreen from "./CheckFriendRequestScreen.jsx";
 
